@@ -1,0 +1,123 @@
+
+# Add resources to the main namespace
+
+
+"""
+#Endpoint turn a relay on
+@views_app.route('/api/relay/<int:id>/on', methods=['POST'])
+def relay_id_on(id):
+    if id in ids:
+        relay = relays[id]
+        relay.turn_on()
+        return jsonify({"message": f"relay {id} is ON"}),200
+    else:
+        return jsonify({"message": f"relay {id} does not exist"}),404
+
+#Endpoint turn a relay off
+@views_app.route('/api/relay/<int:id>/off', methods=['POST'])
+def relay_id_off(id):
+    if id in ids:
+        relay = relays[id]
+        relay.turn_off()
+        return jsonify({"message": f"relay {id} is OFF"}),200
+    else:
+        return jsonify({"message": f"relay {id} does not exist"}),404
+
+#set all relays ON
+@views_app.route('api/relay/all/on', methods=['POST'])
+def turn_all_relay_on():
+    for relay in relays.values():  # Iterate over values of the relays dictionary
+        relay.turn_on()
+    return jsonify({'message': 'Simulated all relays turned on'}),200
+
+#endpoint to reset all relay
+@views_app.route('api/relay/reset', methods=['POST'])
+def reset_all_relays():
+    for relay in relays.values():
+        relay.turn_off()
+    return jsonify({"message": "All relays have been reset"}),200
+
+# Endpoint retuen all relays
+@views_app.route('api/relay/all', methods=['GET'])
+def get_all_relay():
+    all_relays_status = {}
+    for id, relay in relays.items():
+        all_relays_status[f"relay_{id}"] = relay.as_dict()
+    return jsonify(all_relays_status)
+
+# Endpoint retuen statue ON relays
+@views_app.route('api/relay/onlyON', methods=['GET'])
+def get_only_on():
+    on_relays = {}
+    for id, relay in relays.items():
+        if relay.status=="ON":
+            on_relays[f"relay_{id}"] = relay.as_dict()
+    if on_relays=={}:
+        return jsonify({'message': 'no relay is ON'})
+    else:
+        return jsonify(on_relays)
+
+
+
+from flask import request,jsonify
+from flask_restx import Resource, Namespace
+from my_app.models.relay import Relay
+
+ns = Namespace("api", description="API for controlling relays and digital inputs")
+
+# Dummy data for relays and digital inputs
+relays = {
+    "relay1": {"state": "off"},
+    "relay2": {"state": "off"},
+    "relay3": {"state": "off"}
+}
+
+digital_inputs = {
+    "input1": {"state": "off"},
+    "input2": {"state": "off"},
+    "input3": {"state": "off"}
+}
+
+# Define namespaces
+relay_ns = Namespace('relay', description='Relay operations')
+input_ns = Namespace('digital-input', description='Digital input operations')
+
+# Retrieve Relay Information
+@relay_ns.route('/<string:relay_id>')
+class Relay(Resource):
+    def get(self, relay_id):
+        if relay_id in relays:
+            return relays[relay_id], 200
+        else:
+            return {"error": "Relay with id '{}' does not exist".format(relay_id)}, 400
+# Retrieve Relay Information
+@relay_ns.route('/all')
+class allrelay(Resource):
+    def get():
+        return jsonify(relays)
+    
+
+# Update Relay Status
+@relay_ns.route('/<string:relay_id>/on')
+class UpdateRelay(Resource):
+    def post(self,relay_id):
+        if relay_id in relays:
+            relays[relay_id]['state'] = "on"
+            return {"message": "Relay with id '{relay_id}' turned on"}, 200
+        else:
+            return {"error": "Relay with id '{}' does not exist".format(relay_id)}, 400
+
+# Retrieve Digital Input Information
+@input_ns.route('/<string:input_id>')
+class DigitalInput(Resource):
+    def get(self, input_id):
+        if input_id in digital_inputs:
+            return digital_inputs[input_id], 200
+        else:
+            return {"error": "Digital input with id '{}' does not exist".format(input_id)}, 400
+
+# # Add namespaces to main API
+# ns.add_namespace(relay_ns)
+# ns.add_namespace(input_ns)
+
+"""
