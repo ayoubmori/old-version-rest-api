@@ -1,4 +1,3 @@
-import datetime
 
 class Relay:
     def __init__(self, id, status="OFF"):
